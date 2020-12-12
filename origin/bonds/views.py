@@ -9,7 +9,7 @@ from .models import Bond
 from .serializers import BondSerializer
 from .constants import GLEIF_API_ENDPOINT
 
-class InvalidLEIException(Exception): 
+class InvalidLEIException(Exception):
     pass
 
 class BondsList(APIView):
@@ -22,12 +22,12 @@ class BondsList(APIView):
 
     def post(self, request):
 
-        try:     
+        try:
             legal_name =self.get_legal_name(request)
-        # Return 503 if error due to unsuccessful get request. 
+        # Return 503 if error due to unsuccessful get request.
         except ConnectionError as e:
             return Response(str(e), status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        # Return 400 if error due to missing or invalid LEI. 
+        # Return 400 if error due to missing or invalid LEI.
         except (ValueError, InvalidLEIException) as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
@@ -39,20 +39,20 @@ class BondsList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def get_legal_name(self, request): 
+    def get_legal_name(self, request):
         # If LEI not specified, raise an exception
-        if "lei" not in request.data: 
+        if "lei" not in request.data:
             raise ValueError("LEI not specified")
 
         lei = request.data["lei"]
         url = GLEIF_API_ENDPOINT +'?lei=' + lei
-        # If requests.get fails, raise a ConnectionError. 
-        try: 
+        # If requests.get fails, raise a ConnectionError.
+        try:
             response = requests.get(url)
-        except: 
+        except:
             raise ConnectionError("Failed to connect to the GLEIF API.")
-        # If status code outside of the 200-200 range or no legal names returned, raise exception. 
-        if (not response.ok) or (len(response.json()) == 0): 
+        # If status code outside of the 200-200 range or no legal names returned, raise exception.
+        if (not response.ok) or (not response.json()):
             raise InvalidLEIException("LEI " + lei + " is invalid or does not exist.")
 
         legal_name = response.json()[0]['Entity']['LegalName']['$']

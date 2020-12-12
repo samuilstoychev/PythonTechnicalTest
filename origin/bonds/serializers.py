@@ -2,7 +2,6 @@ from rest_framework import serializers
 from bonds.models import Bond
 
 class BondSerializer(serializers.ModelSerializer):
-    # legal_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Bond
@@ -10,9 +9,5 @@ class BondSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Bond.objects.create(**validated_data)
-
-    # def get_legal_name(self, obj):
-    #     return "PLACEHOLDER"
-    
     
     
