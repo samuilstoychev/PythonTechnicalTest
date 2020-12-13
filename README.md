@@ -12,7 +12,7 @@ We would like you to implement an api to: ingest some data representing bonds, q
 #### Project Quickstart
 
 Inside a virtual environment running Python 3:
-- `pip install -r requirement.txt`
+- `pip install -r requirements.txt`
 - `./manage.py runserver` to run server.
 - `./manage.py test` to run tests.
 
@@ -54,4 +54,17 @@ to see something like:
 We would also like to be able to add a filter such as:
 `GET /bonds/?legal_name=BNPPARIBAS`
 
-to reduce down the results.
+to reduce down the results. 
+
+# Solution
+Bonds can be listed, filtered and posted using the `/bonds/` path. 
+
+For connecting to the GLEIF API, I have used the `requests` library. For mocking API calls in `tests.py`, I have used the `responses` library. Both libraries have been added as a dependency in `requirements.txt`. 
+
+Each `Bond` is associated with a `User`, who created it and owns it. Each user can only see their own bonds. 
+
+I have implemented user authentication following Django [REST Framework's authentication tutorial](https://www.django-rest-framework.org/api-guide/authentication/#api-reference). If you are interacting with the API through the browser, you can log into your user account from the *"Login"* button at the top right corner. 
+
+Users can be registered via the admin console (at `/admin`/) or via a post request to `/registration/`. The registration endpoint was implemented consulting [this tutorial](https://nemecek.be/blog/23/how-to-createregister-user-account-with-django-rest-framework-api). 
+
+All tests are defined in the `tests.py` file and split into categories. 
