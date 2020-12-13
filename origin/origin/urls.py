@@ -21,6 +21,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('bonds/', BondsList.as_view()),
-    path('signin/', include('rest_framework.urls')),
+    path('login/', include('rest_framework.urls')),
     path('register/', UserRegistration.as_view()),
 ]
