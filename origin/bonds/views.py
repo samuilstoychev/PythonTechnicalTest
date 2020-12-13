@@ -25,7 +25,15 @@ class BondsList(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get(self, request):
-        bonds = Bond.objects.all().filter(owner=request.user)
+        # Also handle the validation error 
+        fields = ['isin', 'size', 'currency', 'maturity', 'lei', 'legal_name']
+        filters = {field: self.request.GET.get(field, None) for field in fields}
+        filters = {key: val for key, val in filters.items() if val is not None}
+        filters["owner"] = request.user
+        try: 
+            bonds = Bond.objects.all().filter(**filters)
+        except ValueError as e: 
+            return Response("Invalid query value(s) provided.", status=status.HTTP_400_BAD_REQUEST)
         return Response(BondSerializer(bonds, many=True).data, status=status.HTTP_200_OK)
 
     def post(self, request):

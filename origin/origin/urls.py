@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('bonds/', BondsList.as_view()),
     path('signin/', include('rest_framework.urls')),
-    path('register', UserRegistration.as_view()),
+    path('register/', UserRegistration.as_view()),
 ]
