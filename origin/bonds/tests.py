@@ -1,12 +1,18 @@
+"""
+Tests for the `bonds` application. 
+"""
 from rest_framework.test import APITestCase
 from rest_framework import status
-from bonds.models import Bond
-from bonds.serializers import BondSerializer
 import requests
 import responses
+from bonds.models import Bond
+from bonds.serializers import BondSerializer
 from bonds.constants import GLEIF_API_ENDPOINT
 
 class RoutingTest(APITestCase):
+    """
+    Tests for the routing of the API (as defined in origin/urls.py)
+    """
     def test_bonds_path_returns_200(self):
         resp = self.client.get("/bonds/")
         assert resp.status_code == status.HTTP_200_OK
@@ -30,13 +36,19 @@ MOCK_POST_DATA = {
 MOCK_GLEIF_RESPONSE = [{"Entity":{"LegalName":{"$":"MOCK BANK"}}}]
 
 class GetAndPostTest(APITestCase):
+    """
+    Tests for the GET and POST request logic in views.py. 
+    Requests to the GLEIF API are mocked. 
+    """
     def test_return_empty_list_if_no_bonds(self):
         resp = self.client.get("/bonds/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         assert not resp.json()
 
+    # Using the `responses` library to mock requests to the GLEIF API. 
     @responses.activate
     def test_post_request_creates_a_bond(self):
+        # This will return a mock response from the call to requests.get
         responses.add(responses.GET, GLEIF_API_ENDPOINT, json=MOCK_GLEIF_RESPONSE, status=200)
         self.assertEqual(Bond.objects.count(), 0)
         resp = self.client.post("/bonds/", MOCK_POST_DATA, format='json')
@@ -59,6 +71,7 @@ class GetAndPostTest(APITestCase):
     
     @responses.activate
     def test_invalid_lei_returns_400(self):
+        # Mock status 400 response (LEI provided has invalid length/characters)
         responses.add(responses.GET, GLEIF_API_ENDPOINT, json={'message': 'Invalid LEI'}, status=400)
         INVALID_POST_DATA = MOCK_POST_DATA.copy()
         INVALID_POST_DATA["lei"] = "AAAAAAAAAAAAAAAAAAAA"
@@ -67,12 +80,14 @@ class GetAndPostTest(APITestCase):
     
     @responses.activate
     def test_nonexistent_lei_returns_400(self):
-        responses.add(responses.GET, GLEIF_API_ENDPOINT, json=[], status=400)
+        # Mock empty response (LEI has valid length but does not correspond to a legal name)
+        responses.add(responses.GET, GLEIF_API_ENDPOINT, json=[], status=200)
         resp = self.client.post("/bonds/", MOCK_POST_DATA, format='json')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
     
     @responses.activate
-    def test_failed_gleif_request_returns_503(self): 
+    def test_failed_gleif_request_returns_503(self):
+        # Mock a failed call to requests.get (e.g. due to timeout or GLEIF API being down) 
         responses.add(responses.GET, GLEIF_API_ENDPOINT, body=Exception('...'))
         resp = self.client.post("/bonds/", MOCK_POST_DATA, format='json')
         self.assertEqual(resp.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -96,6 +111,9 @@ MOCK_BOND_ATTRIBUTES = {
 }
 
 class BondSerializerTest(APITestCase):
+    """
+    Tests for the BondSerializer defined in bonds/serializers.py. 
+    """
         
     def test_serialized_bond_has_correct_fields(self):
         bond = Bond(**MOCK_BOND_ATTRIBUTES)

@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from bonds.views import BondsList
+from bonds.views import BondsList, UserRegistration
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('bonds/', BondsList.as_view())
+    path('bonds/', BondsList.as_view()),
+    path('signin/', include('rest_framework.urls')),
+    path('register', UserRegistration.as_view()),
 ]
