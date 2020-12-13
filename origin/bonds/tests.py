@@ -7,7 +7,7 @@ import requests
 import responses
 from bonds.models import Bond
 from bonds.serializers import BondSerializer, UserSerializer
-from bonds.constants import GLEIF_API_ENDPOINT
+from bonds.views import GLEIF_API_ENDPOINT
 from django.contrib.auth.models import User
 from rest_framework.test import force_authenticate
 
